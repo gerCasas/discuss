@@ -28,7 +28,7 @@ defmodule Discuss.TopicController do
     changeset = Topic.changeset(%Topic{}, topic)
 
     case Repo.insert(changeset) do
-      {:ok, post} ->
+      {:ok, _topic} ->
         conn
         |> put_flash(:info, "Topic Created")
         |> redirect(to: topic_path(conn, :index))
@@ -39,6 +39,43 @@ defmodule Discuss.TopicController do
         |> put_flash(:error, "Topic can't be blank.")
         |> render "new.html", changeset: changeset
     end
+  end
+
+  #  params fue remplezado por %{"id" => topic_id} con pattern matching
+  def edit(conn, %{"id" => topic_id}) do
+    # Repo.get(nombreTabla,idRecord) metodo para obtener un record por id de base de datos.
+    topic = Repo.get(Topic, topic_id)
+    changeset = Topic.changeset(topic)
+
+    render conn, "edit.html", changeset: changeset, topic: topic
+  end
+
+  # metodo para actualizar el topic con parametros del id del topic a modificar y el nuevo topic string a poner.
+  def update(conn, %{"id" => topic_id, "topic" => topic}) do
+
+    old_topic = Repo.get(Topic, topic_id)
+    changeset = Topic.changeset(old_topic, topic)
+    # misma forma que las dos lineas de codigo de arriba pero con pipe
+    # changeset = Repo.get(Topic, topic_id) |> Topic.changeset(topic)
+
+    case Repo.update(changeset) do
+      {:ok, _topic} ->
+        conn
+        |> put_flash(:info, "Topic Updated")
+        |> redirect(to: topic_path(conn, :index))
+
+      {:error, changeset} ->
+        render conn, "edit.html", changeset: changeset, topic: old_topic
+    end
+  end
+
+  def delete(conn, %{"id" => topic_id}) do
+    # el ! en los metodos es para mandar un mensaje error de phoenix cuando algo salga mal con algunos de los metodos, por ejemplo que no encuentre el record a eliminar o que por alguna razon no lo pueda eliminar.
+    Repo.get!(Topic, topic_id) |> Repo.delete!
+
+    conn
+    |> put_flash(:info, "Topic Deleted")
+    |> redirect(to: topic_path(conn, :index))
   end
 
 end
