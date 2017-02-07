@@ -5,6 +5,7 @@ defmodule Discuss.User do
     field :email, :string
     field :provider, :string
     field :token, :string
+    has_many :topics, Discuss.Topic # has_many sirve para asociar los modelos de user y topic. has_many se refiere a que users puede tener muchos topics.
 
     timestamps()
   end

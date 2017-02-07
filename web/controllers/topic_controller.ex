@@ -1,9 +1,16 @@
 defmodule Discuss.TopicController do
   use Discuss.Web, :controller
+
   alias Discuss.Topic
+
+  # Solo se aplica el plug para validar usuario login en los siguientes defs (excluido el index de esta lista.)
+  plug Discuss.Plugs.RequireAuth when action in [:new, :create, :edit, :update, :delete]
+  # function plug (:check_topic_owner) - es un plug que solo ejecuta una funcion y por lo general solo se usan en un controller.
+  plug :check_topic_owner when action in [:update, :edit, :delete]
 
   # metodo para traer todos los topics de base de datos con Repo.all(Topic)
   def index(conn, _params) do
+    IO.inspect(conn.assigns)
     topics = Repo.all(Topic)
     render conn, "index.html", topics: topics
   end
@@ -25,7 +32,15 @@ defmodule Discuss.TopicController do
   #  params fue remplezado por %{"topic" => topic} con pattern matching
   def create(conn, %{"topic" => topic}) do
     # params regresa varias cosas, dentro de esas cosas esta "topic" => %{"title" => "asdasdasd"}
-    changeset = Topic.changeset(%Topic{}, topic)
+
+    # Cualquiera de las dos sintaxis para obtener valores de conn.assigns es valida:
+    # conn.assigns[:user] ó conn.assigns.user
+
+    # Con build_assoc() se liga el nuevo registro de topic con el current user id.
+    # changeset = Topic.changeset(%Topic{}, topic)
+    changeset = conn.assigns.user
+      |> build_assoc(:topics)
+      |> Topic.changeset(topic)
 
     case Repo.insert(changeset) do
       {:ok, _topic} ->
@@ -76,6 +91,20 @@ defmodule Discuss.TopicController do
     conn
     |> put_flash(:info, "Topic Deleted")
     |> redirect(to: topic_path(conn, :index))
+  end
+
+  # params es diferente en este metodo por que es un plug
+  def check_topic_owner(conn, _params) do
+    %{params: %{"id" => topic_id}} = conn
+
+    if Repo.get(Topic, topic_id).user_id == conn.assigns.user.id do
+      conn
+    else
+      conn
+      |> put_flash(:error, "You cannot edit that")
+      |> redirect(to: topic_path(conn, :index))
+      |> halt(  )
+    end
   end
 
 end

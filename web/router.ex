@@ -7,6 +7,8 @@ defmodule Discuss.Router do
     plug :fetch_flash
     plug :protect_from_forgery
     plug :put_secure_browser_headers
+    # se refiere al plug que cree en controllers>plugs>set_user.ex
+    plug Discuss.Plugs.SetUser
   end
 
   pipeline :api do
@@ -31,6 +33,7 @@ defmodule Discuss.Router do
     pipe_through :browser
     # :provider se refiere a cualquier provider (facebook, google, github, etc)
     # :request no esta definido en AuthController por que el plug Ueberauth ya lo implementa.
+    get "/signout", AuthController, :signout
     get "/:provider", AuthController, :request
     get "/:provider/callback", AuthController, :callback
   end
