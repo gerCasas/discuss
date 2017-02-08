@@ -15,6 +15,12 @@ defmodule Discuss.TopicController do
     render conn, "index.html", topics: topics
   end
 
+  # redirecciona a show.html para mirar un topic
+  def show(conn, %{"id" => topic_id}) do
+    topic = Repo.get!(Topic, topic_id)
+    render conn, "show.html", topic: topic
+  end
+
   # este def new apunta a new.html.eex en la carpeta web>templates>topic
   # new es el nombre clave
   def new(conn, _params) do
@@ -38,6 +44,7 @@ defmodule Discuss.TopicController do
 
     # Con build_assoc() se liga el nuevo registro de topic con el current user id.
     # changeset = Topic.changeset(%Topic{}, topic)
+
     changeset = conn.assigns.user
       |> build_assoc(:topics)
       |> Topic.changeset(topic)
@@ -51,7 +58,7 @@ defmodule Discuss.TopicController do
       {:error, changeset} ->
         # render conn, "new.html", changeset: changeset
         conn
-        |> put_flash(:error, "Topic can't be blank.")
+        |> put_flash(:error, "Topic can't be blank and needs to be at least 30 characters long.")
         |> render "new.html", changeset: changeset
     end
   end
