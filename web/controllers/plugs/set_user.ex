@@ -10,6 +10,7 @@ defmodule Discuss.Plugs.SetUser do
   def init(_params) do
   end
 
+  # el params de call se refiere al params que regrese init
   def call(conn, _params) do
     user_id = get_session(conn, :user_id)
     # condition statement (similar a else if)
