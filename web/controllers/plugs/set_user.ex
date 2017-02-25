@@ -7,10 +7,12 @@ defmodule Discuss.Plugs.SetUser do
   alias Discuss.User
 
   # init esta vacio por que en realidad no lo ocupamos, solo se requiere implementar.
+  # init se mandara a llamar solo una vez cuando se mande a llamar por primera vez el plug.
   def init(_params) do
   end
 
   # el params de call se refiere al params que regrese init
+  # call se mandara a llamar cada vez que llegue un request o se mande a llamar de otro modulo
   def call(conn, _params) do
     user_id = get_session(conn, :user_id)
     # condition statement (similar a else if)

@@ -4,6 +4,7 @@ defmodule Discuss.Plugs.RequireAuth do
 
   alias Discuss.Router.Helpers # para topic_path()
 
+  # init esta vacio por que en realidad no lo ocupamos, solo se requiere implementar.
   def init(_params) do
   end
 
